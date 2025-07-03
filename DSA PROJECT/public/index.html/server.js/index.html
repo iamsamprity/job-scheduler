@@ -1,180 +1,151 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Job Scheduler • Max Profit</title>
-  <!-- Tailwind CSS -->
+  <title>Job Scheduling Optimization</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <!-- AOS (Animate On Scroll) -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-  <!-- Font Awesome for icons -->
-  <script src="https://kit.fontawesome.com/7b3d9c9f8f.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
   <style>
-    body {font-family: 'Poppins', sans-serif;}
-    /* Hero gradient */
-    .gradient-bg {background: linear-gradient(135deg,#2563eb 0%,#9333ea 100%);}  
-    /* Glass morph card */
-    .glass-card {background: rgba(255,255,255,0.25);backdrop-filter: blur(16px);-webkit-backdrop-filter: blur(16px);border:1px solid rgba(255,255,255,0.18);}  
-    /* Ripple effect */
-    .ripple {position: relative;overflow: hidden;}
-    .ripple::after {content:"";position:absolute;left:50%;top:50%;width:0;height:0;background:rgba(255,255,255,0.4);border-radius:9999px;transform:translate(-50%,-50%);opacity:0;transition:width .4s ease,height .4s ease,opacity .8s;}  
-    .ripple:active::after {width:200%;height:200%;opacity:1;transition:0s;}  
+    body {
+      background: radial-gradient(circle at center, #0f172a, #030712);
+      font-family: 'Orbitron', sans-serif;
+      color: #67e8f9;
+    }
+
+    .neon-box {
+      border: 1px solid rgba(103, 232, 249, 0.4);
+      box-shadow: 0 0 10px rgba(103, 232, 249, 0.3);
+      background-color: rgba(30, 41, 59, 0.5);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    input {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e0f2fe;
+      border: 1px solid #67e8f9;
+    }
+
+    .popup {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-  <!-- **** Navbar **** -->
-  <header class="w-full gradient-bg py-4 sticky top-0 z-30 shadow-lg">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4">
-      <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-wide" data-aos="fade-right">JobScheduler<span class="font-light">.io</span></h1>
-      <!-- Dark mode toggle -->
-      <button id="themeToggle" class="text-white text-xl ripple focus:outline-none" aria-label="toggle theme">
-        <i class="fa-solid fa-circle-half-stroke"></i>
-      </button>
-    </div>
-  </header>
+<body class="p-6 min-h-screen flex flex-col items-center">
 
-  <!-- **** Hero **** -->
-  <section class="gradient-bg pb-32 pt-20 relative">
-    <!-- Decorative wave -->
-    <svg class="absolute bottom-0 w-full" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 64L48 58.7C96 53 192 43 288 37.3C384 32 480 32 576 48C672 64 768 96 864 101.3C960 107 1056 85 1152 80C1248 75 1344 85 1392 90.7L1440 96V0H1392C1344 0 1248 0 1152 0C1056 0 960 0 864 0C768 0 672 0 576 0C480 0 384 0 288 0C192 0 96 0 48 0H0V64Z" fill="#f9fafb"></path></svg>
+  <h1 class="text-4xl font-bold text-cyan-400 mb-6 text-center animate-pulse">Job Scheduling Optimization</h1>
+  <p class="text-cyan-300 text-center mb-6">Enter jobs with deadlines and profits, and optimize the schedule for maximum profit.</p>
 
-    <div class="max-w-6xl mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-10">
-      <div class="text-white" data-aos="fade-up">
-        <h2 class="text-4xl md:text-5xl font-bold leading-tight">Plan smarter.<br/>Earn higher <span class="text-yellow-300">profit</span>.</h2>
-        <p class="mt-4 text-lg opacity-90">An intuitive job‑scheduling tool that squeezes maximum revenue out of every single time‑slot.</p>
-        <a href="#scheduler" class="inline-block mt-8 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-semibold px-6 py-3 rounded-lg ripple shadow-lg">Start Scheduling</a>
-      </div>
-      <!-- Lottie animation -->
-      <div class="flex justify-center items-center" data-aos="zoom-in">
-        <div id="lottie" class="w-[320px] h-[320px]"></div>
+  <div class="neon-box p-6 w-full max-w-5xl popup">
+    <!-- Job Input -->
+    <h2 class="text-2xl mb-4">Enter Job Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <input id="jobId" type="text" placeholder="Job ID" class="px-4 py-2 rounded" />
+      <input id="deadline" type="number" placeholder="Deadline" class="px-4 py-2 rounded" />
+      <input id="profit" type="number" placeholder="Profit" class="px-4 py-2 rounded" />
+      <div class="flex gap-2">
+        <button onclick="addJob()" class="bg-cyan-500 hover:bg-cyan-600 text-black font-bold px-4 py-2 rounded">Add Job</button>
+        <button onclick="scheduleJobs()" class="bg-blue-500 hover:bg-blue-600 text-black font-bold px-4 py-2 rounded">Optimize</button>
       </div>
     </div>
-  </section>
 
-  <!-- **** Scheduler Card **** -->
-  <main id="scheduler" class="-mt-24 pb-20">
-    <div class="max-w-4xl mx-auto px-4">
-      <div class="glass-card p-8 rounded-3xl shadow-xl" data-aos="fade-up" data-aos-delay="100">
-        <h3 class="text-2xl font-semibold mb-6 text-center">Job Scheduler</h3>
-        <!-- Input Row -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <input id="jobId" type="text" placeholder="Job ID" class="col-span-2 md:col-span-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-400 dark:bg-slate-800" />
-          <input id="deadline" type="number" placeholder="Deadline" class="col-span-2 md:col-span-2 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-400 dark:bg-slate-800" />
-          <input id="profit" type="number" placeholder="Profit" class="col-span-2 md:col-span-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-400 dark:bg-slate-800" />
-          <button onclick="addJob()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg px-4 py-2 ripple shadow">Add</button>
-        </div>
-        <!-- Job Table -->
-        <div class="overflow-x-auto mb-6">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="jobTable">
-            <thead class="bg-gray-100 dark:bg-slate-800">
-              <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Deadline</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Profit</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700" id="jobTableBody"></tbody>
-          </table>
-        </div>
-        <div class="text-center">
-          <button onclick="scheduleJobs()" class="bg-green-600 hover:bg-green-700 text-white text-lg font-semibold px-6 py-3 rounded-lg ripple shadow">Schedule Jobs</button>
-        </div>
-        <!-- Results -->
-        <div id="result" class="mt-8"></div>
+    <!-- Job List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-xl mb-2">📋 Job List</h3>
+        <table class="w-full text-left text-cyan-200">
+          <thead>
+            <tr>
+              <th class="border-b border-cyan-500 pb-2">Job ID</th>
+              <th class="border-b border-cyan-500 pb-2">Deadline</th>
+              <th class="border-b border-cyan-500 pb-2">Profit</th>
+            </tr>
+          </thead>
+          <tbody id="jobTable"></tbody>
+        </table>
+      </div>
+
+      <!-- Schedule Result -->
+      <div>
+        <h3 class="text-xl mb-2">📈 Scheduled Jobs</h3>
+        <table class="w-full text-left text-cyan-200">
+          <thead>
+            <tr>
+              <th class="border-b border-cyan-500 pb-2">Time Slot</th>
+              <th class="border-b border-cyan-500 pb-2">Job ID</th>
+              <th class="border-b border-cyan-500 pb-2">Profit</th>
+            </tr>
+          </thead>
+          <tbody id="resultTable"></tbody>
+        </table>
+        <p id="totalProfit" class="mt-4 font-bold text-green-300"></p>
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- **** Footer **** -->
-  <footer class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-    © <span id="year"></span> JobScheduler.io • Crafted with <i class="fa-solid fa-heart text-red-500"></i>
-  </footer>
+  <!-- Lottie Animation -->
+  <div id="lottie-container" class="w-56 h-56 mt-10"></div>
 
-  <!-- Scripts -->
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.10.1/lottie.min.js"></script>
   <script>
-    /* ===== Initialise AOS ===== */
-    AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
-
-    /* ===== Lottie Animation ===== */
-    lottie.loadAnimation({
-      container: document.getElementById('lottie'),
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      path: 'https://assets10.lottiefiles.com/packages/lf20_IY4w8D.json' // remote animation file
-    });
-
-    /* ===== Dark mode toggle ===== */
-    const themeToggle = document.getElementById('themeToggle');
-    const root = document.documentElement;
-    themeToggle.addEventListener('click', () => {
-      root.classList.toggle('dark');
-    });
-
-    /* ===== Dynamic year ===== */
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    /* ===== Job Scheduler Logic ===== */
-    let jobs = [];
+    const jobs = [];
 
     function addJob() {
       const id = document.getElementById('jobId').value.trim();
       const deadline = parseInt(document.getElementById('deadline').value);
       const profit = parseInt(document.getElementById('profit').value);
-      if (!id || isNaN(deadline) || isNaN(profit)) {
-        alert('Please provide valid job details.');
+
+      if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit < 0) {
+        alert('❌ Please enter valid values.');
         return;
       }
+
       jobs.push({ id, deadline, profit });
+      updateJobList();
+      document.getElementById('jobId').value = '';
+      document.getElementById('deadline').value = '';
+      document.getElementById('profit').value = '';
+    }
 
-      const tbody = document.getElementById('jobTableBody');
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td class="px-4 py-2 whitespace-nowrap">${id}</td>
-        <td class="px-4 py-2 whitespace-nowrap">${deadline}</td>
-        <td class="px-4 py-2 whitespace-nowrap">₹${profit}</td>
-      `;
-      tbody.appendChild(row);
-
-      // Reset inputs
-      ['jobId','deadline','profit'].forEach(id => document.getElementById(id).value = '');
+    function updateJobList() {
+      const table = document.getElementById('jobTable');
+      table.innerHTML = '';
+      jobs.forEach(job => {
+        table.innerHTML += `<tr><td>${job.id}</td><td>${job.deadline}</td><td>₹${job.profit}</td></tr>`;
+      });
     }
 
     async function scheduleJobs() {
-      if (!jobs.length) { alert('Add at least one job.'); return; }
       const res = await fetch('/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobs })
       });
       const data = await res.json();
-      renderResult(data);
+
+      const resultTable = document.getElementById('resultTable');
+      resultTable.innerHTML = '';
+      data.scheduledJobs.forEach((job, index) => {
+        resultTable.innerHTML += `<tr><td>${index + 1}</td><td>${job.id}</td><td>₹${job.profit}</td></tr>`;
+      });
+
+      document.getElementById('totalProfit').textContent = `💰 Total Profit: ₹${data.totalProfit}`;
     }
 
-    function renderResult(data) {
-      let html = `
-        <h4 class="text-xl font-semibold mb-4 text-center">Optimal Schedule</h4>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mb-4">
-            <thead class="bg-indigo-50 dark:bg-slate-700">
-              <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium tracking-wider">Job</th>
-                <th class="px-4 py-2 text-left text-xs font-medium tracking-wider">Profit</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-      `;
-      data.scheduledJobs.forEach(job => {
-        html += `<tr><td class="px-4 py-2">${job.id}</td><td class="px-4 py-2">₹${job.profit}</td></tr>`;
-      });
-      html += `</tbody></table></div><p class="text-lg font-semibold text-green-600 dark:text-green-400 text-center">Total Profit: ₹${data.totalProfit}</p>`;
-      document.getElementById('result').innerHTML = html;
-    }
+    // Lottie animation
+    lottie.loadAnimation({
+      container: document.getElementById('lottie-container'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'https://assets10.lottiefiles.com/packages/lf20_klplwfxp.json'
+    });
   </script>
 </body>
 </html>
