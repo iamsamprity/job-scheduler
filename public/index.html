@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Scheduling Optimization</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lottie-web/build/player/lottie.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background: radial-gradient(circle at center, #0f172a, #030712);
+      font-family: 'Orbitron', sans-serif;
+      color: #67e8f9;
+    }
+
+    .neon-box {
+      border: 1px solid rgba(103, 232, 249, 0.4);
+      box-shadow: 0 0 10px rgba(103, 232, 249, 0.3);
+      background-color: rgba(30, 41, 59, 0.5);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    input {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e0f2fe;
+      border: 1px solid #67e8f9;
+    }
+
+    .popup {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="p-6 min-h-screen flex flex-col items-center">
+
+  <h1 class="text-4xl font-bold text-cyan-400 mb-6 text-center animate-pulse">Job Scheduling Optimization</h1>
+  <p class="text-cyan-300 text-center mb-6">Enter jobs with deadlines and profits, and optimize the schedule for maximum profit.</p>
+
+  <div class="neon-box p-6 w-full max-w-5xl popup">
+    <h2 class="text-2xl mb-4">Enter Job Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <input id="jobId" type="text" placeholder="Job ID" class="px-4 py-2 rounded" />
+      <input id="deadline" type="number" placeholder="Deadline" class="px-4 py-2 rounded" />
+      <input id="profit" type="number" placeholder="Profit" class="px-4 py-2 rounded" />
+      <div class="flex gap-2">
+        <button onclick="addJob()" class="bg-cyan-500 hover:bg-cyan-600 text-black font-bold px-4 py-2 rounded">Add Job</button>
+        <button onclick="scheduleJobs()" class="bg-blue-500 hover:bg-blue-600 text-black font-bold px-4 py-2 rounded">Optimize</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-xl mb-2">📋 Job List</h3>
+        <table class="w-full text-left text-cyan-200">
+          <thead>
+            <tr>
+              <th class="border-b border-cyan-500 pb-2">Job ID</th>
+              <th class="border-b border-cyan-500 pb-2">Deadline</th>
+              <th class="border-b border-cyan-500 pb-2">Profit</th>
+            </tr>
+          </thead>
+          <tbody id="jobTable"></tbody>
+        </table>
+      </div>
+
+      <div>
+        <h3 class="text-xl mb-2">📈 Scheduled Jobs</h3>
+        <table class="w-full text-left text-cyan-200">
+          <thead>
+            <tr>
+              <th class="border-b border-cyan-500 pb-2">Time Slot</th>
+              <th class="border-b border-cyan-500 pb-2">Job ID</th>
+              <th class="border-b border-cyan-500 pb-2">Profit</th>
+            </tr>
+          </thead>
+          <tbody id="resultTable"></tbody>
+        </table>
+        <p id="totalProfit" class="mt-4 font-bold text-green-300"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="lottie-container" class="w-56 h-56 mt-10"></div>
+
+  <div class="flex gap-4 mt-6">
+  <button onclick="resetCSV()" class="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded">
+    🧹 Reset CSV
+  </button>
+
+  <a href="/download" download class="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded">
+    ⬇️ Download CSV
+  </a> 
+</div>
+
+<button onclick="submitJobs()">Save Jobs</button>
+
+  <script>
+    const jobs = [];
+
+    function addJob() {
+      const id = document.getElementById('jobId').value.trim();
+      const deadline = parseInt(document.getElementById('deadline').value);
+      const profit = parseInt(document.getElementById('profit').value);
+
+      if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit < 0) {
+        alert('❌ Please enter valid values.');
+        return;
+      }
+
+      jobs.push({ id, deadline, profit });
+      updateJobList();
+      document.getElementById('jobId').value = '';
+      document.getElementById('deadline').value = '';
+      document.getElementById('profit').value = '';
+    }
+
+    async function fetchPreviousJobs() {
+      const res = await fetch('/read');
+      const data = await res.json();
+
+      console.log("Fetched jobs from server:", data);
+
+      if (Array.isArray(data)) {
+        data.forEach(job => jobs.push(job));
+        updateJobList();
+      }
+    }
+
+    window.onload = fetchPreviousJobs;
+
+
+    async function resetCSV() {
+      const res = await fetch('/reset', { method: 'POST' });
+      const data = await res.json();
+      alert(data.message || 'CSV Reset!');
+
+      // ✅ Clear frontend job list
+      jobs.length = 0;
+      updateJobList();
+
+      // ✅ Clear scheduled jobs display too
+      document.getElementById('resultTable').innerHTML = '';
+      document.getElementById('totalProfit').textContent = '';
+    }
+
+
+    function updateJobList() {
+      const table = document.getElementById('jobTable');
+      table.innerHTML = '';
+      jobs.forEach(job => {
+        table.innerHTML += `<tr><td>${job.id}</td><td>${job.deadline}</td><td>₹${job.profit}</td></tr>`;
+      });
+    }
+
+    async function scheduleJobs() {
+      const res = await fetch('/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobs })
+      });
+      const data = await res.json();
+
+      const resultTable = document.getElementById('resultTable');
+      resultTable.innerHTML = '';
+      data.scheduledJobs.forEach((job, index) => {
+        resultTable.innerHTML += `<tr><td>${index + 1}</td><td>${job.id}</td><td>₹${job.profit}</td></tr>`;
+      });
+
+      document.getElementById('totalProfit').textContent = `💰 Total Profit: ₹${data.totalProfit}`;
+    }
+
+    // Lottie animation
+    lottie.loadAnimation({
+      container: document.getElementById('lottie-container'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'https://assets10.lottiefiles.com/packages/lf20_klplwfxp.json'
+    });
+
+    async function submitJobs() {
+      if (jobs.length === 0) {
+        alert("⚠️ No jobs to save!");
+        return;
+      }
+
+      const response = await fetch("/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ jobs })
+      });
+
+      const data = await response.json();
+      console.log("Scheduled Jobs:", data.scheduledJobs);
+      alert(`✅ Jobs saved & optimized! Total Profit: ₹${data.totalProfit}`);
+    }
+  </script>
+</body>
+</html>
