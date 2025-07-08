@@ -37,6 +37,15 @@ job-scheduler/
 ```sh
 npm install
 ```
+```sh
+npm install csv-parser
+```
+```sh
+npm install fast-csv
+```
+```sh
+npm install -g nodemon
+```
 
 ### 2. Start the server
 
