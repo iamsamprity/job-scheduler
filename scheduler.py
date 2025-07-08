@@ -1,26 +1,29 @@
 import sys
 import json
 
-def job_scheduling(jobs):
+def schedule_jobs(jobs):
     jobs.sort(key=lambda x: x['profit'], reverse=True)
     max_deadline = max(job['deadline'] for job in jobs)
-    slots = [False] * (max_deadline + 1)
-    result = [None] * (max_deadline + 1)
+    # Each slot represents a day; False means free
+    time_slots = [False] * (max_deadline + 1)
+    result = []
     total_profit = 0
 
     for job in jobs:
-        for t in range(job['deadline'], 0, -1):
-            if not slots[t]:
-                slots[t] = True
-                result[t] = job
+        # Try to find a window of 'duration' free days ending at or before deadline
+        for end_day in range(job['deadline'], job['duration'] - 1, -1):
+            # Check if all days in this window are free
+            if all(not time_slots[day] for day in range(end_day - job['duration'] + 1, end_day + 1)):
+                # Mark these days as occupied
+                for day in range(end_day - job['duration'] + 1, end_day + 1):
+                    time_slots[day] = True
+                result.append(job)
                 total_profit += job['profit']
                 break
 
-    scheduled = [j for j in result if j]
-    return scheduled, total_profit
+    return {'scheduledJobs': result, 'totalProfit': total_profit}
 
 if __name__ == "__main__":
-    input_json = sys.stdin.read()
-    jobs = json.loads(input_json)
-    scheduled_jobs, total_profit = job_scheduling(jobs)
-    print(json.dumps({"scheduledJobs": scheduled_jobs, "totalProfit": total_profit}))
+    jobs = json.loads(sys.stdin.read())
+    output = schedule_jobs(jobs)
+    print(json.dumps(output))

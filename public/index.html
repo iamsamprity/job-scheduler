@@ -49,6 +49,7 @@
       <input id="jobId" type="text" placeholder="Job ID" class="px-4 py-2 rounded" />
       <input id="deadline" type="number" placeholder="Deadline" class="px-4 py-2 rounded" />
       <input id="profit" type="number" placeholder="Profit" class="px-4 py-2 rounded" />
+      <input id="duration" type="number" placeholder="Duration" class="px-4 py-2 rounded" />
       <div class="flex gap-2">
         <button onclick="addJob()" class="bg-cyan-500 hover:bg-cyan-600 text-black font-bold px-4 py-2 rounded">Add Job</button>
         <button onclick="scheduleJobs()" class="bg-blue-500 hover:bg-blue-600 text-black font-bold px-4 py-2 rounded">Optimize</button>
@@ -64,6 +65,7 @@
               <th class="border-b border-cyan-500 pb-2">Job ID</th>
               <th class="border-b border-cyan-500 pb-2">Deadline</th>
               <th class="border-b border-cyan-500 pb-2">Profit</th>
+              <th class="border-b border-cyan-500 pb-2">Duration</th>
             </tr>
           </thead>
           <tbody id="jobTable"></tbody>
@@ -108,17 +110,19 @@
       const id = document.getElementById('jobId').value.trim();
       const deadline = parseInt(document.getElementById('deadline').value);
       const profit = parseInt(document.getElementById('profit').value);
+      const duration = parseInt(document.getElementById('duration').value);
 
-      if (!id || isNaN(deadline) || isNaN(profit) || deadline <= 0 || profit < 0) {
+      if (!id || isNaN(deadline) || isNaN(profit) || isNaN(duration) || deadline <= 0 || profit < 0 || duration <= 0) {
         alert('❌ Please enter valid values.');
         return;
       }
 
-      jobs.push({ id, deadline, profit });
+      jobs.push({ id, deadline, profit, duration });
       updateJobList();
       document.getElementById('jobId').value = '';
       document.getElementById('deadline').value = '';
       document.getElementById('profit').value = '';
+      document.getElementById('duration').value = '';
     }
 
     async function fetchPreviousJobs() {
@@ -151,11 +155,17 @@
     }
 
 
+    // Update the updateJobList() function to include duration
     function updateJobList() {
       const table = document.getElementById('jobTable');
       table.innerHTML = '';
       jobs.forEach(job => {
-        table.innerHTML += `<tr><td>${job.id}</td><td>${job.deadline}</td><td>₹${job.profit}</td></tr>`;
+        table.innerHTML += `<tr>
+          <td>${job.id}</td>
+          <td>${job.deadline}</td>
+          <td>₹${job.profit}</td>
+          <td>${job.duration}</td>
+        </tr>`;
       });
     }
 

@@ -1,1 +1,6 @@
-JobID,Deadline,Profit
+JobID,Deadline,Profit,Duration
+A,4,100,2
+B,2,19,1
+C,3,27,2
+D,1,25,2
+E,5,15,3
