@@ -12,6 +12,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 const CSV_FILE = path.join(__dirname, 'jobs.csv');
+const SCHEDULED_CSV_FILE = path.join(__dirname, 'scheduled.csv');
 let existingJobIDs = new Set();
 
 // 🧹 Clear CSV on server start
@@ -64,6 +65,14 @@ app.post('/schedule', (req, res) => {
   python.on('close', (code) => {
     try {
       const result = JSON.parse(dataString);
+
+      // Save scheduled jobs to scheduled.csv with time slots
+      let scheduledCSV = 'TimeSlot,Job ID,Profit,Duration\n';
+      result.scheduledJobs.forEach(job => {
+        scheduledCSV += `"${job.time_slots.join('-')}",${job.id},₹${job.profit},${job.duration}\n`;
+      });
+      fs.writeFileSync(SCHEDULED_CSV_FILE, scheduledCSV);
+
       res.json(result);
     } catch (err) {
       res.status(500).json({ error: 'Failed to parse Python output.' });
@@ -94,6 +103,28 @@ app.get('/read', (req, res) => {
     .on('error', (err) => {
       console.error('CSV Read Error:', err);
       res.status(500).json({ error: 'Failed to read CSV file.' });
+    });
+});
+
+// 📤 Endpoint to read scheduled jobs from CSV
+app.get('/read-scheduled', (req, res) => {
+  const scheduledJobs = [];
+  fs.createReadStream(SCHEDULED_CSV_FILE)
+    .pipe(fastcsv.parse({ headers: true }))
+    .on('data', row => {
+      scheduledJobs.push({
+        time_slots: row['TimeSlot'].replace(/"/g, '').split('-'),
+        id: row['Job ID'],
+        profit: parseInt(row['Profit'].replace('₹', '')),
+        duration: parseInt(row['Duration'])
+      });
+    })
+    .on('end', () => {
+      res.json(scheduledJobs);
+    })
+    .on('error', (err) => {
+      console.error('Scheduled CSV Read Error:', err);
+      res.status(500).json({ error: 'Failed to read scheduled CSV file.' });
     });
 });
 

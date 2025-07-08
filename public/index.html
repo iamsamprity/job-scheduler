@@ -77,9 +77,10 @@
         <table class="w-full text-left text-cyan-200">
           <thead>
             <tr>
-              <th class="border-b border-cyan-500 pb-2">Time Slot</th>
+              <th class="border-b border-cyan-500 pb-2">TimeSlot</th>
               <th class="border-b border-cyan-500 pb-2">Job ID</th>
               <th class="border-b border-cyan-500 pb-2">Profit</th>
+              <th class="border-b border-cyan-500 pb-2">Duration</th>
             </tr>
           </thead>
           <tbody id="resultTable"></tbody>
@@ -179,8 +180,13 @@
 
       const resultTable = document.getElementById('resultTable');
       resultTable.innerHTML = '';
-      data.scheduledJobs.forEach((job, index) => {
-        resultTable.innerHTML += `<tr><td>${index + 1}</td><td>${job.id}</td><td>₹${job.profit}</td></tr>`;
+      data.scheduledJobs.forEach((job) => {
+        resultTable.innerHTML += `<tr>
+          <td>${job.time_slots ? job.time_slots.join('-') : ''}</td>
+          <td>${job.id}</td>
+          <td>₹${job.profit}</td>
+          <td>${job.duration}</td>
+        </tr>`;
       });
 
       document.getElementById('totalProfit').textContent = `💰 Total Profit: ₹${data.totalProfit}`;
@@ -213,6 +219,21 @@
       console.log("Scheduled Jobs:", data.scheduledJobs);
       alert(`✅ Jobs saved & optimized! Total Profit: ₹${data.totalProfit}`);
     }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+  const resultTable = document.getElementById('resultTable');
+  const res = await fetch('/read-scheduled');
+  const scheduledJobs = await res.json();
+  resultTable.innerHTML = '';
+  scheduledJobs.forEach(job => {
+    resultTable.innerHTML += `<tr>
+      <td>${job.time_slots ? job.time_slots.join('-') : ''}</td>
+      <td>${job.id}</td>
+      <td>₹${job.profit}</td>
+      <td>${job.duration}</td>
+    </tr>`;
+  });
+});
   </script>
 </body>
 </html>
